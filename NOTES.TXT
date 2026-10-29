@@ -1,0 +1,92 @@
+Serializers : In DRF, Serializers are responsible for converting complex data such as querysets and models instances to native python datatypes (called serialization)
+that can be easil renered into JSON, XML or other content types which is understandable by front end. and it's vice-versa is called deserialization
+
+
+Complex Data --->| Serializers | ---> Python Data ---> (JSON, XML) ----> | Decrialization | ----> Complex Data
+
+for Decrialization some functions\modules are use 
+
+BytesIo() : A stream implementation using an in memory bytes buffer it inherits BufferedIOBase. the buffer discarded when the close() method
+is called
+
+import io
+stream = io.BytesIo(json_data)
+
+JSONParser() : used to parse json data to python native data type
+
+from rest_framework.parsers import JSONParser
+parsed_data = JSONParser().parse(stream)
+
+Decrialization : allows parsed data to converting into complex types after first validating the incoming data
+
+creating serializer object 
+serializer = StudentSerializer(data=parsed_data)
+
+validating data 
+serializer.is_valid()
+
+serializer.validate_data
+serializer.errors
+
+
+for updating the data create a serializer class as usual and implement a method 
+
+def update(self, instance, validate_data):
+  instance.name = validate_data.get('name', instance.name)
+  instance.roll = validate_data.get('roll', inctance.roll)
+  instance.city = vlaidate_data.get('city', instance.city)
+  instance.save()
+  return instance
+
+here "intance" means old data which was stored in database. 
+
+complet update data 
+by default serializer must be passed values for all required fields or they will raise validation errors
+required all data from front/end client
+
+serializer = StudentSerializer(stu, data=pythondata)
+if serialization.is_valid():
+ serializer.save()
+
+for partial udate not all data is required 
+
+sesrialzer = StudentSerializer(stu, data=pythondata, partial=True)
+if serialization.is_valid():
+ serializer.save()
+
+
+If you are updateing all the credential of user so don't use partial = True from the view and make sure you provide every value for the column in the table 
+
+Validation in DRF
+
+FIEDLD LVL
+OBJECT LVL
+VALIDATORS
+
+field lvl : we can specify custom field lvl validation by adding validate_fieldName methods to your serializer subclass.
+
+syntax def validate_feildName(self, value)
+example def validate_roll(self, value)
+
+object lvl :  
+
+
+in token based authentication there are muliple way to genrate token for the user first way is to genrate a token directly from the admin pannel and the ohter method is use this commend 
+python manage.py drf_create_token user , if the token for the user is alredy creaated so it will return the genratd token if not so it will create new token.
+one more third way is by exposing and API endpoint.
+by which user can genrate their tokens by themself , usr provide their login credential to platform and get's a token
+
+use "obtain_auth_token view to your URLconfig
+
+from rest_framework.authtoken.views import obtain_auth_token
+urlpatterns = [
+  path('gettoken/', obtain_auth_token)
+]
+
+it will return the json response when valid ussername and password fields are posted to the view using form data or json
+ 
+ here browsable api becomes very tough so we use httppie
+ ex : 
+ http POST "url/gettoken/ username="usenrname" password="password"
+ {'token' : '13sd132r2332s0d2f02331e2r123113s1e321t32t3232fds'}
+if the token for the user is alredy creaated so it will return the genratd token if not so it will create new token.
